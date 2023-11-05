@@ -10,8 +10,8 @@ namespace ve {
         static constexpr int HEIGHT = 600;
 
         void run();
-
+        //describe this private member
     private:
         VeWindow veWindow{WIDTH, HEIGHT, "Vulkan Window"};
     };
-}
+} // namespace ve

@@ -15,4 +15,4 @@ namespace ve {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         window = glfwCreateWindow(WIDTH, HEIGHT, windowName.c_str(), nullptr, nullptr);
     }
-}
+} // namespace ve
