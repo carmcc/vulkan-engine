@@ -2,6 +2,7 @@
 
 #include "ve_window.hpp"
 #include "ve_pipeline.hpp"
+#include "ve_device.hpp"
 
 namespace ve {
 
@@ -14,6 +15,10 @@ namespace ve {
         //describe this private member
     private:
         VeWindow veWindow{WIDTH, HEIGHT, "Vulkan Window"};
-        VePipeline vePipeline {"shaders/easy_shader.vert", "shaders/easy_shader.frag"};
+        VeDevice veDevice{veWindow};
+        VePipeline vePipeline {veDevice,
+                               "shaders/easy_shader.vert",
+                               "shaders/easy_shader.frag",
+                               VePipeline::defaultPipelineConfigInfo(WIDTH,HEIGHT)};
     };
 } // namespace ve
