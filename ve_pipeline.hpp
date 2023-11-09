@@ -4,7 +4,20 @@
 #include "string"
 #include "vector"
 namespace ve {
-    struct PipelineConfigInfo {};
+    struct PipelineConfigInfo {
+        VkViewport viewport;
+        VkRect2D scissor;
+        VkPipelineViewportStateCreateInfo viewportInfo;
+        VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+        VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+        VkPipelineMultisampleStateCreateInfo multisampleInfo;
+        VkPipelineColorBlendAttachmentState colorBlendAttachment;
+        VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+        VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+        VkPipelineLayout pipelineLayout = nullptr;
+        VkRenderPass renderPass = nullptr;
+        uint32_t subpass = 0;
+    };
     class VePipeline
     {
     public:
@@ -12,7 +25,7 @@ namespace ve {
                    const std::string &vertFilePath,
                    const std::string &fragFilePath,
                    const PipelineConfigInfo &configInfo);
-        ~VePipeline(){};
+        ~VePipeline();
         VePipeline (const VePipeline&) = delete;
         void operator=(const VePipeline&) = delete;
 
