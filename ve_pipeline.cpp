@@ -74,13 +74,20 @@ namespace ve {
         vertexInputInfo.pVertexBindingDescriptions = nullptr; //optional
         vertexInputInfo.pVertexAttributeDescriptions = nullptr; //optional
 
+        VkPipelineViewportStateCreateInfo viewportInfo{};
+        viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportInfo.viewportCount = 1;
+        viewportInfo.pViewports = &configInfo.viewport;
+        viewportInfo.scissorCount = 1;
+        viewportInfo.pScissors = &configInfo.scissor;
+
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount = 2; //vertex and fragment shader
         pipelineInfo.pStages = shaderStages;
         pipelineInfo.pVertexInputState = &vertexInputInfo; //vertex input
         pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo; //input assembly
-        pipelineInfo.pViewportState = &configInfo.viewportInfo; //viewport and scissor
+        pipelineInfo.pViewportState = &viewportInfo; //viewport and scissor
         pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo; //rasterization
         pipelineInfo.pMultisampleState = &configInfo.multisampleInfo; //multisample
 
@@ -129,11 +136,6 @@ namespace ve {
         configInfo.scissor.offset = {0, 0};
         configInfo.scissor.extent = {width, height};
 
-        configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        configInfo.viewportInfo.viewportCount = 1;
-        configInfo.viewportInfo.pViewports = &configInfo.viewport;
-        configInfo.viewportInfo.scissorCount = 1;
-        configInfo.viewportInfo.pScissors = &configInfo.scissor;
 
         configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         configInfo.rasterizationInfo.depthClampEnable = VK_FALSE;
