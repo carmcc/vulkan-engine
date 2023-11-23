@@ -16,6 +16,7 @@ namespace ve {
         while (!veWindow.shouldClose()) {
             glfwPollEvents();
             drawFrame();
+            vkDeviceWaitIdle(veDevice.device()); //wait for the device to finish operations before destroying the swap chain
         }
     }
 
