@@ -15,6 +15,7 @@ namespace ve {
     void FirstApp::run() {
         while (!veWindow.shouldClose()) {
             glfwPollEvents();
+            drawFrame();
         }
     }
 
@@ -92,5 +93,17 @@ namespace ve {
             }
         }
     };
-    void FirstApp::drawFrame() {};
+    void FirstApp::drawFrame() {
+        uint32_t imageIndex;
+        auto result = veSwapChain.acquireNextImage(&imageIndex);
+
+        if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            //recreateSwapChain();
+            throw std::runtime_error("failed to acquire swap chain image!");
+        }
+        result = veSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error("failed to present swap chain image!");
+        }
+    }
 } // namespace ve
