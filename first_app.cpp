@@ -4,6 +4,7 @@
 namespace ve {
 
     FirstApp::FirstApp() {
+        loadModels();
         createPipelineLayout();
         createPipeline();
         createCommandBuffers();
@@ -20,6 +21,14 @@ namespace ve {
         }
     }
 
+    void FirstApp::loadModels() {
+        std::vector<VeModel::Vertex> vertices{
+                {{0.0f, -0.5f}},
+                {{0.5f, 0.5f}},
+                {{-0.5f, 0.5f}}
+        };
+        veModel = std::make_unique<VeModel>(veDevice, vertices);
+    }
     void FirstApp::createPipelineLayout() {
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -86,7 +95,8 @@ namespace ve {
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             vePipeline->bind(commandBuffers[i]);
-            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            veModel->bind(commandBuffers[i]);
+            veModel->draw(commandBuffers[i]);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
