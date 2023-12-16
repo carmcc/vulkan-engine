@@ -5,7 +5,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
-namespace ve_model{
+namespace ve {
     class VeModel {
     public:
         struct Vertex {
@@ -29,4 +29,4 @@ namespace ve_model{
         VkDeviceMemory vertexBufferMemory;
         uint32_t vertexCount;
     };
-} // namespace ve_model
+} // namespace ve
