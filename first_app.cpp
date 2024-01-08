@@ -44,8 +44,8 @@ namespace ve {
     }
 
     void FirstApp::createPipeline() {
-        auto pipelineConfig = VePipeline::defaultPipelineConfigInfo(veSwapChain.width(), veSwapChain.height());
-        pipelineConfig.renderPass = veSwapChain.getRenderPass();
+        auto pipelineConfig = VePipeline::defaultPipelineConfigInfo(veSwapChain->width(), veSwapChain->height());
+        pipelineConfig.renderPass = veSwapChain->getRenderPass();
         pipelineConfig.pipelineLayout = pipelineLayout;
         vePipeline = std::make_unique<VePipeline>(
                 veDevice,
@@ -56,7 +56,7 @@ namespace ve {
     }
 
     void FirstApp::createCommandBuffers(){
-        commandBuffers.resize(veSwapChain.imageCount());
+        commandBuffers.resize(veSwapChain->imageCount());
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -78,11 +78,11 @@ namespace ve {
 
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = veSwapChain.getRenderPass();
-            renderPassInfo.framebuffer = veSwapChain.getFrameBuffer(i);
+            renderPassInfo.renderPass = veSwapChain->getRenderPass();
+            renderPassInfo.framebuffer = veSwapChain->getFrameBuffer(i);
 
             renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = veSwapChain.getSwapChainExtent();
+            renderPassInfo.renderArea.extent = veSwapChain->getSwapChainExtent();
 
 
             std::array<VkClearValue, 2> clearValues{};
@@ -106,13 +106,13 @@ namespace ve {
     };
     void FirstApp::drawFrame() {
         uint32_t imageIndex;
-        auto result = veSwapChain.acquireNextImage(&imageIndex);
+        auto result = veSwapChain->acquireNextImage(&imageIndex);
 
         if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             //recreateSwapChain();
             throw std::runtime_error("failed to acquire swap chain image!");
         }
-        result = veSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        result = veSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
         if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }

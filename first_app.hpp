@@ -29,10 +29,12 @@ namespace ve {
         void createPipeline();
         void createCommandBuffers();
         void drawFrame();
+        void recreateSwapChain();
+        void recordCommandBuffer(int imageIndex);
 
         VeWindow veWindow{WIDTH, HEIGHT, "Vulkan Window"};
         VeDevice veDevice{veWindow};
-        VeSwapChain veSwapChain{veDevice, veWindow.getExtent()};
+        std::unique_ptr<VeSwapChain> veSwapChain;
         std::unique_ptr<VePipeline> vePipeline;
         VkPipelineLayout pipelineLayout;
         std::vector<VkCommandBuffer> commandBuffers;
