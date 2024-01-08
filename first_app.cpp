@@ -1,12 +1,13 @@
 #include "first_app.hpp"
 #include "stdexcept"
+#include "cassert"
 #include "array"
 namespace ve {
 
     FirstApp::FirstApp() {
         loadModels();
         createPipelineLayout();
-        createPipeline();
+        recreateSwapChain();
         createCommandBuffers();
     }
 
