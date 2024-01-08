@@ -13,22 +13,25 @@ namespace ve {
     FirstApp::~FirstApp() {
         vkDestroyPipelineLayout(veDevice.device(), pipelineLayout, nullptr);
     }
+
     void FirstApp::run() {
         while (!veWindow.shouldClose()) {
             glfwPollEvents();
             drawFrame();
-            vkDeviceWaitIdle(veDevice.device()); //wait for the device to finish operations before destroying the swap chain
+            vkDeviceWaitIdle(
+                    veDevice.device()); //wait for the device to finish operations before destroying the swap chain
         }
     }
 
     void FirstApp::loadModels() {
         std::vector<VeModel::Vertex> vertices{
-                {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-                {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-                {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+                {{0.0f,  -0.5f}, {1.0f, 0.0f, 0.0f}},
+                {{0.5f,  0.5f},  {0.0f, 1.0f, 0.0f}},
+                {{-0.5f, 0.5f},  {0.0f, 0.0f, 1.0f}}
         };
         veModel = std::make_unique<VeModel>(veDevice, vertices);
     }
+
     void FirstApp::createPipelineLayout() {
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -52,10 +55,21 @@ namespace ve {
                 "shaders/easy_shader.vert.spv",
                 "shaders/easy_shader.frag.spv",
                 pipelineConfig
-                );
+        );
     }
 
-    void FirstApp::createCommandBuffers(){
+    void FirstApp::recreateSwapChain() {
+        auto extent = veWindow.getExtent();
+        while (extent.width == 0 || extent.height == 0) {
+            extent = veWindow.getExtent();
+            glfwWaitEvents();
+        }
+        vkDeviceWaitIdle(veDevice.device());
+        veSwapChain = std::make_unique<VeSwapChain>(veDevice, extent);
+        createPipeline();
+    }
+
+    void FirstApp::createCommandBuffers() {
         commandBuffers.resize(veSwapChain->imageCount());
 
         VkCommandBufferAllocateInfo allocInfo{};
@@ -64,46 +78,41 @@ namespace ve {
         allocInfo.commandPool = veDevice.getCommandPool();
         allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
 
-        if(vkAllocateCommandBuffers(veDevice.device(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(veDevice.device(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
 
-        for(int i = 0; i < commandBuffers.size(); i++) {
-            VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    }
 
-            if(vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
-                throw std::runtime_error("failed to begin recording command buffer!");
-            }
+    void FirstApp::recordCommandBuffer(int imageIndex) {
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = veSwapChain->getRenderPass();
+        renderPassInfo.framebuffer = veSwapChain->getFrameBuffer(imageIndex);
 
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = veSwapChain->getRenderPass();
-            renderPassInfo.framebuffer = veSwapChain->getFrameBuffer(i);
-
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = veSwapChain->getSwapChainExtent();
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = veSwapChain->getSwapChainExtent();
 
 
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
-            clearValues[1].depthStencil = {1.0f, 0};
-            VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
+        clearValues[1].depthStencil = {1.0f, 0};
+        VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
 
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            vePipeline->bind(commandBuffers[i]);
-            veModel->bind(commandBuffers[i]);
-            veModel->draw(commandBuffers[i]);
+        vePipeline->bind(commandBuffers[imageIndex]);
+        veModel->bind(commandBuffers[imageIndex]);
+        veModel->draw(commandBuffers[imageIndex]);
 
-            vkCmdEndRenderPass(commandBuffers[i]);
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to record command buffer!");
-            }
+        vkCmdEndRenderPass(commandBuffers[imageIndex]);
+        if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to record command buffer!");
         }
-    };
+    }
+
     void FirstApp::drawFrame() {
         uint32_t imageIndex;
         auto result = veSwapChain->acquireNextImage(&imageIndex);
