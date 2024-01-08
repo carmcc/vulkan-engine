@@ -16,6 +16,7 @@ namespace ve {
 
     void FirstApp::run() {
         while (!veWindow.shouldClose()) {
+            //https://www.glfw.org/docs/latest/window.html
             glfwPollEvents();
             drawFrame();
             vkDeviceWaitIdle(
@@ -117,11 +118,23 @@ namespace ve {
         uint32_t imageIndex;
         auto result = veSwapChain->acquireNextImage(&imageIndex);
 
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            recreateSwapChain();
+            return;
+        }
+
         if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             //recreateSwapChain();
             throw std::runtime_error("failed to acquire swap chain image!");
         }
+
+        recordCommandBuffer(imageIndex);
         result = veSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || veWindow.wasWindowResized()) {
+            veWindow.resetWindowResizedFlag();
+            recreateSwapChain();
+            return;
+        }
         if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }
