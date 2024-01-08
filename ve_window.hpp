@@ -24,16 +24,20 @@ namespace ve {
 
         bool shouldClose() { return glfwWindowShouldClose(window); }
 
-        VkExtent2D getExtent() { return {static_cast<uint32_t>(WIDTH), static_cast<uint32_t>(HEIGHT)}; }
+        VkExtent2D getExtent() { return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)}; }
+        bool wasWindowResized() { return framebufferResized; }
+        void resetWindowResizedFlag() { framebufferResized = false; }
 
         void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
     private:
+        static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
         void initWindow();
 
-        const int WIDTH = 800;
-        const int HEIGHT = 600;
+        int width = 800;
+        int height = 600;
+        bool framebufferResized = false; //flag to check if the window is resized
 
         std::string windowName;
         GLFWwindow* window;
