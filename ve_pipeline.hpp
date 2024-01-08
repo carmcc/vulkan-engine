@@ -26,7 +26,7 @@ namespace ve {
                    const PipelineConfigInfo &configInfo);
         ~VePipeline();
         VePipeline (const VePipeline&) = delete;
-        void operator=(const VePipeline&) = delete;
+        VePipeline& operator=(const VePipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
         //static default pipeline config
